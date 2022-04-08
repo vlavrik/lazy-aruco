@@ -1,3 +1,6 @@
+"""Calibration of a camera.
+"""
+
 import os
 import pickle
 import cv2
@@ -5,6 +8,13 @@ from tqdm import tqdm
 
 
 class Calibrate():
+    """Calibration
+
+    Parameters
+    ----------
+    aruco_dict : str
+        One of the predefined ArUco dictionaries. Defaults to "DICT_5X5_100"
+    """
     aruco_dict_list = [
         "DICT_4X4_50",
         "DICT_4X4_100",
