@@ -14,6 +14,10 @@ class Calibrate():
     ----------
     aruco_dict : str
         One of the predefined ArUco dictionaries. Defaults to "DICT_5X5_100"
+    path_to_images : str
+        Path to stored images to perform a calibration.
+    calibration_filename : str
+        A name of calibration file wothout extension.
     """
     aruco_dict_list = [
         "DICT_4X4_50",
