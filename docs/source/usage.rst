@@ -33,7 +33,7 @@ will raise an exception.
 
 For example:
 
->>> import lumache
->>> lumache.get_random_ingredients()
+>>> import laruco
+>>> laruco.get_random_ingredients()
 ['shells', 'gorgonzola', 'parsley']
 
