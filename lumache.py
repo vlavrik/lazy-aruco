@@ -41,6 +41,12 @@ def get_person(lastname, firstname, age, sex):
     -------
     tuple
         lastname, firstname, age, sex
+
+    Examples
+    --------
+    Fetching one of the persons.
+
+    >>> get_person('Max', 'Muster', 23, True)
     """
 
     return lastname, firstname, age, sex
