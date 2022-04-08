@@ -13,6 +13,7 @@ version = '0.1.0'
 
 extensions = [
     'sphinx.ext.duration',
+    'numpydoc',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
