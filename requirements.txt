@@ -1,1 +1,4 @@
 numpydoc
+opencv-contrib-python
+opencv-python
+
