@@ -4,9 +4,9 @@ import setuptools
 #     long_description = fh.read()
 
 setuptools.setup(
-    name='lauruco',
+    name='laruco',
     version='0.0.1',
-    description='The python wrapper of a gateway rest API of a flespi platform.',
+    description='Description',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/vlavrik/',
