@@ -21,3 +21,26 @@ def get_random_ingredients(kind=None):
     :rtype: list[str]
     """
     return ["shells", "gorgonzola", "parsley"]
+
+
+def get_person(lastname, firstname, age, sex):
+    """Gets a person identity.
+
+    Parameters
+    ----------
+    lastname : str
+        A lstname of a person
+    firstname : str
+        A firstname of a person
+    age : int
+        Age
+    sex : bool
+        Sex of a person. Defaults to True.
+
+    Returns
+    -------
+    tuple
+        lastname, firstname, age, sex
+    """
+
+    return lastname, firstname, age, sex
