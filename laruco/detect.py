@@ -7,6 +7,15 @@ from .utils import estimate_area, rotation_matrix_to_euler_angles, is_rotation_m
 
 
 class Detection():
+    """ArUco markers detection.
+
+    Parameters
+    ----------
+    aruco_dict : str
+        One of the predefined ArUco dictionaries. Defaults to "DICT_5X5_100"
+    calibration_filename : str
+        A name of calibration file wothout extension.
+    """
     aruco_dict_list = [
         "DICT_4X4_50",
         "DICT_4X4_100",
@@ -31,16 +40,7 @@ class Detection():
         "DICT_APRILTAG_36h11"
     ]
 
-    def __init__(self, aruco_dict, calibration_filename=None):
-        """The main class for ArUco markers detection.
-
-        Parameters
-        ----------
-        aruco_dict : str
-            The set of ArUco markers, known as a dictionary. 
-        calibration_filename : str, optional
-            The full path to a file where the camera calibration is stored, by default None
-        """
+    def __init__(self, aruco_dict="DICT_5X5_100", calibration_filename=None):
         self.aruco_dict = aruco_dict
         self.calibration_filename = calibration_filename
 
@@ -53,11 +53,12 @@ class Detection():
             (cameraMatrix, distCoeffs) = pickle.load(f)
             f.close()
         except:
+            print('[WARNING] No calibration file found.')
             (cameraMatrix, distCoeffs) = (None, None)
 
         return aruco_dict, aruco_params, cameraMatrix, distCoeffs
 
-    def _detect(self, frame, marker_size):
+    def _detect(self, frame):
 
         aruco_dict, aruco_params, camera_matrix, dist_coeffs = self._initialize_detector()
         try:
@@ -69,9 +70,9 @@ class Detection():
 
         return corners, ids, rejected
 
-    def _detect_marker_area(self, frame, marker_size):
+    def _detect_marker_area(self, frame):
 
-        corners, ids, rejected = self._detect(frame, marker_size)
+        corners, ids, rejected = self._detect(frame)
         list_cX, list_cY, list_areas = list(), list(), list()
 
         if corners:
@@ -85,15 +86,15 @@ class Detection():
 
         return list_cX, list_cY, list_areas
 
-    def detect_images(self, path_to_frames, path_to_detections, marker_size, headless=False):
+    def detect_images(self, path_to_raw_frames, path_to_detected_frames, headless=False):
         """Performs the detection of ArUco markers.
 
         Parameters
         ----------
-        path_to_frames : str
+        path_to_raw_frames : str
             Path where the set of frames are stored.
-        marker_size : float
-            The size of marker to be detected. A unit has to be consistent with a unit used for a calibration.
+        path_to_detected_frames : str
+            Pathe where detected frames will be saved.
         headless : bool, optional
             If True the frame with detected markers is not displayed, by default False
 
@@ -106,22 +107,21 @@ class Detection():
         ids_list = list()
         rejected_list = list()
 
-        filenames = os.listdir(path_to_frames)
+        filenames = os.listdir(path_to_raw_frames)
         for filename in filenames:
-            frame = cv2.imread(path_to_frames + filename)
-            corners, ids, rejected = self._detect(frame, marker_size)
+            frame = cv2.imread(path_to_raw_frames + filename)
+            corners, ids, rejected = self._detect(frame)
             if ids is not None:
-                if not headless or path_to_detections is not None:
+                if not headless:
                     cv2.aruco.drawDetectedMarkers(frame, corners)
-                    try:
-                        cv2.imwrite(path_to_detections+filename, frame)
-                    except:
-                        pass
+                    cv2.imwrite(path_to_detected_frames + filename, frame)
                     cv2.imshow('ArUco detection', frame)
                     cv2.waitKey(0)
                     cv2.destroyAllWindows()
                 else:
-                    pass
+
+                    cv2.aruco.drawDetectedMarkers(frame, corners)
+                    cv2.imwrite(path_to_detected_frames + filename, frame)
                 corners_list.append(corners)
                 ids_list.append(ids)
                 rejected_list.append(rejected)
@@ -130,34 +130,36 @@ class Detection():
 
         return corners_list, ids_list, rejected_list
 
-    def detect_marker(self, frame, marker_size):
-        """_summary_
+    def detect_marker(self, frame):
+        """Detects markers on the input frame.
 
         Parameters
         ----------
-        frame : _type_
-            _description_
-        marker_size : _type_
-            _description_
+        frame : numpy.ndarray
+            The frame where AruCo markers must be detected.
 
         Returns
         -------
-        corners : tuple
-            _description_
-        ids : ndarray
-            _description_
-        rejected : tuple
-            _description_
+        corners : list
+            List of arrays. Every array is a vector of detected marker corners. For each marker, its four corners are provided.
+        ids : list
+            List of arrays. Every array is a vector of identifiers of the detected markers.
+        rejected : list
+            List of arrays. Every array contains the points of those squares whose inner code has not a correct codification.
         """
+        if isinstance(frame, np.ndarray):
 
-        try:
-            corners, ids, rejected = self._detect(frame, marker_size)
-        except:
+            try:
+                corners, ids, rejected = self._detect(frame)
+            except:
+                corners, ids, rejected = None, None, None
+        else:
+            print('[WARNING] Check the input frame.')
             corners, ids, rejected = None, None, None
 
         return corners, ids, rejected
 
-    def detect_area(self, frame, marker_size):
+    def detect_area(self, frame, draw_annotations=False):
         """_summary_
 
         Parameters
@@ -172,18 +174,24 @@ class Detection():
         _type_
             _description_
         """
-        list_cX, list_cY, list_areas = list(), list(), list()
-        corners, ids, rejected = self._detect(frame, marker_size)
+
+        list_cX, list_cY, list_areas = self._detect_marker_area(frame)
+        corners, ids, rejected = self._detect(frame)
         try:
             cv2.aruco.drawDetectedMarkers(frame, corners)
         except:
             pass
-        for i in range(len(corners)):
-            list_cX, list_cY, list_areas = list(), list(), list()
-            cX, cY, area = self._detect_marker_area(frame, marker_size)
-            list_cX.append(cX)
-            list_cY.append(cY)
-            list_areas.append(area)
+
+        h = frame.shape[0]
+        w = frame.shape[1]
+        if draw_annotations:
+            try:
+                for i in range(len(list_areas)):
+                    print(ids[i])
+                    cv2.putText(frame, 'ID: ' + str(int(ids[i])) + ' Area: ' + str(int(
+                        list_areas[i])), (5, h - 10 - i*25), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2, cv2.LINE_AA)
+            except:
+                pass
 
         return list_cX, list_cY, list_areas, frame
 

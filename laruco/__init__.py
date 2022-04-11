@@ -1,5 +1,5 @@
 """
-Lumache - Python library for cooks and food lovers.
+Lazy ArUco - easy python library for operating with ArUco markers.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.0.1"
