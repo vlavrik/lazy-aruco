@@ -232,8 +232,12 @@ class Detection():
 
         Returns
         -------
-        _type_
-            _description_
+        rvec_all : numpy.ndarray
+            Array of output rotation vectors.
+        tvec_all : numpy.ndarray
+            Array of output translation vectors.
+        frame : numpy.ndarray
+            Frame with detections drawn. If parameter draw_annotations is True, the id and area of detected markers are also drawn.
         """
         rvec_all, tvec_all, frame = self._detect_pose(frame, marker_size)
         h = frame.shape[0]
@@ -248,33 +252,54 @@ class Detection():
 
         return rvec_all, tvec_all, frame
 
-    def detect_angles(self, frame, marker_size):
-        """_summary_
+    def detect_angles(self, frame, marker_size, draw_annotations=False):
+        """Estimates x, y and direction of a detected ArUco marker.
 
         Parameters
         ----------
-        frame : _type_
-            _description_
-        marker_size : _type_
-            _description_
+        frame : numpy.ndarray
+            The frame where AruCo markers must be detected.
+        marker_size : float
+            Marker side length.
+        draw_annotations : bool, optional
+            Draws id and area of a detected marker in the frame, by default False.
 
         Returns
         -------
-        _type_
+        x : float
             _description_
+        y : float
+            _description_
+        direction : float
+            _description_
+        frame : numpy.ndarray
+            Frame with detections drawn. If parameter draw_annotations is True, the x, y and direction of a detected marker is also drawn.
         """
 
         rvec_all, tvec_all, frame = self._detect_pose(frame, marker_size)
+        h = frame.shape[0]
+        w = frame.shape[1]
+
         try:
             rvec = rvec_all[0][0]
             tvec = tvec_all[0][0]
             rvec_flipped = rvec * -1
             tvec_flipped = tvec * -1
+
             rotation_matrix, jacobian = cv2.Rodrigues(rvec_flipped)
             realworld_tvec = np.dot(rotation_matrix, tvec_flipped)
+
             p, y, r = rotation_matrix_to_euler_angles(rotation_matrix)
+
             x, y, direction = realworld_tvec[0], realworld_tvec[1], math.degrees(
                 y)
+
+            # to do consider multiple poses
+            if draw_annotations:
+
+                cv2.putText(frame, 'x:' + str(round(x, 1)) + ' y:' + str(round(y, 1)) + ' dir.:' + str(round(direction, 1)), (
+                    5, h - 10 - 0*25), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2, cv2.LINE_AA)
+
         except:
             x, y, direction = None, None, None
         return x, y, direction, frame
