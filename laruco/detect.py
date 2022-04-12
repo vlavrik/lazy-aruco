@@ -160,19 +160,25 @@ class Detection():
         return corners, ids, rejected
 
     def detect_area(self, frame, draw_annotations=False):
-        """_summary_
+        """Calculates area of detected markers.
 
         Parameters
         ----------
-        frame : _type_
-            _description_
-        marker_size : _type_
-            _description_
+        frame : numpy.ndarray
+            The frame where AruCo markers must be detected.
+        draw_annotations : bool, optional
+            Draws id and area of a detected marker in the frame, by default False
 
         Returns
         -------
-        _type_
-            _description_
+        list_cX : list
+            List of X coordinate of a detected marker.
+        list_cY : list
+            List of Y coordinate of a detected marker.
+        list_areas : list
+            List of areas calculated for a detected marker in pixels.
+        frame : numpy.ndarray
+            Frame with detections drawn. If parameter draw_annotations is True, the id and area of detected markers are also drawn.
         """
 
         list_cX, list_cY, list_areas = self._detect_marker_area(frame)
@@ -197,18 +203,48 @@ class Detection():
 
     def _detect_pose(self, frame, marker_size):
         aruco_dict, aruco_params, camera_matrix, dist_coeffs = self._initialize_detector()
-        corners, ids, rejected = self._detect(frame, marker_size)
+        corners, ids, rejected = self._detect(frame)
         cv2.aruco.drawDetectedMarkers(frame, corners)
         rvec_all, tvec_all, _ = cv2.aruco.estimatePoseSingleMarkers(
             corners, marker_size, camera_matrix, dist_coeffs)
         try:
+            # to do draw for all markers
             rvec = rvec_all[0][0]
             tvec = tvec_all[0][0]
             cv2.aruco.drawAxis(frame, camera_matrix,
-                               dist_coeffs, rvec, tvec, 5)
-
+                               dist_coeffs, rvec, tvec, marker_size)
         except:
             pass
+
+        return rvec_all, tvec_all, frame
+
+    def detect_distance(self, frame, marker_size, draw_annotations=False):
+        """Estimates a distance to detected ArUco marker.
+
+        Parameters
+        ----------
+        frame : numpy.ndarray
+            The frame where AruCo markers must be detected.
+        marker_size : float
+            Marker side length.
+        draw_annotations : bool, optional
+            Draws id and area of a detected marker in the frame, by default False.
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        rvec_all, tvec_all, frame = self._detect_pose(frame, marker_size)
+        h = frame.shape[0]
+        w = frame.shape[1]
+        if draw_annotations:
+            try:
+                for i in range(len(tvec_all)):
+                    cv2.putText(frame, 'Dist.: ' + str(int(tvec_all[i][0][-1])), (
+                        5, h - 10 - i*25), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2, cv2.LINE_AA)
+            except:
+                pass
 
         return rvec_all, tvec_all, frame
 
@@ -242,22 +278,3 @@ class Detection():
         except:
             x, y, direction = None, None, None
         return x, y, direction, frame
-
-    def detect_distance(self, frame, marker_size):
-        """_summary_
-
-        Parameters
-        ----------
-        frame : _type_
-            _description_
-        marker_size : _type_
-            _description_
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
-        rvec_all, tvec_all, _ = self._detect_pose(frame, marker_size)
-
-        return rvec_all, tvec_all, frame
