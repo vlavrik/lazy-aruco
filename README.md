@@ -3,21 +3,16 @@
 [![Documentation Status](https://readthedocs.org/projects/lazy-aruco/badge/?version=latest)](https://lazy-aruco.readthedocs.io/en/latest/?badge=latest)
 
 ```python
->>> from flespi_gateway.gateway import Device
->>> dv = Device(device_number=device_number, flespi_token=flespi_token)
->>> telemetry = dv.get_telemetry()
->>> print(telemetry)
-{'result': [{'id': xxxxxx,
-   'telemetry': {'battery.current': {'ts': 1609521935, 'value': 0},
-    'battery.voltage': {'ts': 1609521935, 'value': 4.049},
-    'can.absolute.load': {'ts': 1609327396, 'value': 23}]
-}
+>>> from laruco.detect import Detection
+>>> det = Detection(aruco_dict="DICT_5X5_100", calibration_filename='../calibrations/calibration_l.pckl')
+>>> det.detect_angles(frame,marker_size=2.1)
 ```
 
 ## Installing lazy ArUco and Supported Versions
 
-Lazy ArUco is available on PyPI:
+Lazy ArUco is available on PyPI: 
 
+TO BE DATED
 ```console
 $ python3 -m pip install lazy-aruco
 ```
