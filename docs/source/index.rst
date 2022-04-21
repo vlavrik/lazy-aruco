@@ -1,10 +1,7 @@
 Welcome to Lazy ArUco's documentation!
 ======================================
 
-**Lazy ArUco** is a Python package for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+**Lazy ArUco** is a Python package 
 
 Check out the :doc:`usage` section for further information, including
 how to :ref:`installation` the project.
