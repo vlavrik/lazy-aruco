@@ -130,7 +130,7 @@ class Detection():
 
         return corners_list, ids_list, rejected_list
 
-    def detect_marker(self, frame):
+    def detect_marker(self, frame, draw_annotations=False):
         """Detects markers on the input frame.
 
         Parameters
@@ -151,13 +151,30 @@ class Detection():
 
             try:
                 corners, ids, rejected = self._detect(frame)
+                if draw_annotations:
+                    x1, y1 = int(corners[0][0][0][0]), int(corners[0][0][0][1])
+                    x2, y2 = int(corners[0][0][1][0]), int(corners[0][0][1][1])
+                    x3, y3 = int(corners[0][0][2][0]), int(corners[0][0][2][1])
+                    x4, y4 = int(corners[0][0][3][0]), int(corners[0][0][3][1])
+                    cv2.circle(frame, (x1, y1), 3, (255, 0, 0), 2)
+                    cv2.putText(frame, str(x1) + ',' + str(y1), (x1-10, y1-10),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
+                    cv2.circle(frame, (x2, y2), 3, (0, 255, 0), 2)
+                    cv2.putText(frame, str(x2) + ',' + str(y2), (x2-10, y2-10),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
+                    cv2.circle(frame, (x3, y3), 3, (0, 0, 255), 2)
+                    cv2.putText(frame, str(x3) + ',' + str(y3), (x3-10, y3-10),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
+                    cv2.circle(frame, (x4, y4), 3, (0, 255, 255), 2)
+                    cv2.putText(frame, str(x4) + ',' + str(y4), (x4-10, y4-10),
+                                cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1, cv2.LINE_AA)
             except:
                 corners, ids, rejected = None, None, None
         else:
             print('[WARNING] Check the input frame.')
             corners, ids, rejected = None, None, None
 
-        return corners, ids, rejected
+        return corners, ids, rejected, frame
 
     def detect_area(self, frame, draw_annotations=False):
         """Calculates area of detected markers.
@@ -193,7 +210,6 @@ class Detection():
         if draw_annotations:
             try:
                 for i in range(len(list_areas)):
-                    print(ids[i])
                     cv2.putText(frame, 'ID: ' + str(int(ids[i])) + ' Area: ' + str(int(
                         list_areas[i])), (5, h - 10 - i*25), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2, cv2.LINE_AA)
             except:
