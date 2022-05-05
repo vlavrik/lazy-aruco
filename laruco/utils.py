@@ -129,7 +129,7 @@ def record_video(path_to_save_video, capture_channel=0, resolution=(640, 480)):
     cv2.destroyAllWindows()
 
 
-def slice_video(path_from, file_name, path_to):
+def slice_video(path_from, start_frame, end_frame, file_name, path_to):
     # videoFile = "../video/output.avi"
     videoFile = path_from + '{}.avi'.format(file_name)
     imagesFolder = path_to
@@ -142,10 +142,10 @@ def slice_video(path_from, file_name, path_to):
         if (ret != True):
             break
 
-        if i % 300:  # (frameId < 100):
+        if frameId >= start_frame and frameId <= end_frame:
             filename = imagesFolder + "image_" + str(int(frameId)) + ".jpg"
             cv2.imwrite(filename, frame)
-        i += 1
+
     cap.release()
 
 
